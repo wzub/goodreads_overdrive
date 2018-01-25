@@ -47,17 +47,19 @@ function GDxmlHttpRequest(ODisbn, GDkey) {
 		}
 	})
 	.then(data => {
+		console.log(data);
 		GDratingsText.append("Rating: ",data["books"][0]["average_rating"]);
 	}).catch(error => {
 		// console.error(error);
-		var title = escape(document.querySelector('h1.TitleDetailsHeading-title').textContent);
-		var author = escape(document.querySelector('.TitleDetailsHeading-creatorLink').textContent);
+		var ODTitle = escape(document.querySelector('h1.TitleDetailsHeading-title').textContent);
+		var ODAuthor = escape(document.querySelector('.TitleDetailsHeading-creatorLink').textContent);
 
 		var elemGDerrorlink = document.createElement("a");
-		elemGDerrorlink.href = 'https://www.goodreads.com/search?q='+title+' by '+author;
+		elemGDerrorlink.href = 'https://www.goodreads.com/search?q='+ODTitle+' by '+ODAuthor;
 		elemGDerrorlink.setAttribute('title', 'search on Goodreads.com');
 		elemGDerrorlink.setAttribute('target', '_blank');
 		elemGDerrorlink.append('Error (',error.status,'): ',error.statusText);
+		GDratingsText.append(elemGDerrorlink);
 	}).then(function(){
 		spinner.className = '';
 	});
