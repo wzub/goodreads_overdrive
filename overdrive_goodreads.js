@@ -1,4 +1,5 @@
 var GDkey = 'x3tNCXWYZigfkcFSRUnTyg';
+var iconURL = chrome.runtime.getURL('icons/goodreads-icon.png');
 
 //#title-format-details ul > li
 var ODisbn = escape(document.querySelector('#title-format-details').textContent.match('[0-9]{11,13}'));
@@ -12,7 +13,7 @@ GDratings.setAttribute('id', 'GDratings');
 
 var elemGDicon = document.createElement("img");
 elemGDicon.setAttribute('alt', '(Goodreads icon)');
-elemGDicon.setAttribute('src', browser.extension.getURL('icons/goodreads-icon.png'));
+elemGDicon.setAttribute('src', iconURL);
 
 var elemGDratingSpan = document.createElement("span");
 elemGDratingSpan.setAttribute('id', 'GDratingsText');

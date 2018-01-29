@@ -2,7 +2,7 @@
 	"description": "View Goodreads ratings on Overdrive ebooks and audiobooks",
 	"manifest_version": 2,
 	"name": "Goodreads Ratings on Overdrive",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"homepage_url": "https://waleedzuberi.com/code/goodreads-ratings-overdrive/",
 	"icons": {
 		"128": "icons/icon_128.png",
@@ -25,5 +25,11 @@
 	],
 	"web_accessible_resources": [
 		"icons/goodreads-icon.png"
-	]
+	],
+	"page_action": {
+		"default_icon": {
+			"96": "icons/icon_96.png"
+		},
+		"default_title": "Goodreads Ratings on Overdrive"
+	}
 }
