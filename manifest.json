@@ -14,7 +14,7 @@
 	},
 	"content_scripts": [
 	{
-		"matches": ["*://*.overdrive.com/media/*"],
+		"matches": ["*://*.overdrive.com/*/media/*"],
 		"js": ["overdrive_goodreads.js"],
 		"css": ["overdrive_goodreads.css"]
 	}
