@@ -4,7 +4,7 @@ Hi there! This is just a simple little WebExtension that shows Goodreads ratings
 ## Permissions
 The add-on only activates on Overdrive library pages and accesses the Goodreads API.
 ```
-*://*.overdrive.com/media/*
+*://*.overdrive.com/*/media/*
 *://*.goodreads.com/*
 ```
 ## Installation
