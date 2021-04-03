@@ -2,7 +2,7 @@
 ![goodreads_ratings banner](https://i2.wp.com/waleedzuberi.com/wp-content/uploads/2018/01/banner_1400-560.png)
 Hi there! This is just a simple little WebExtension that shows Goodreads ratings of books and audiobooks on Overdrive library pages.
 ## Permissions
-The add-on only activates on Overdrive library pages and fetches ratings from Goodreads.com.
+The add-on only activates on Overdrive library pages and fetches ratings from Goodreads.com. No personal data is collected or used by this extension.
 ```
 *://*.overdrive.com/media/*
 *://*.overdrive.com/*/media/*
@@ -17,6 +17,8 @@ The add-on only activates on Overdrive library pages and fetches ratings from Go
 ![screenshot](https://i1.wp.com/waleedzuberi.com/wp-content/uploads/2020/05/goodreads-overdrive-sample-stars.jpg)
 
 ## Changelog
+* Version 1.1.0 (3/4/2021)
+	* Handle cases when queryselector doesn't pick up the right div (Edge)
 * Version 1.1.0 (8/5/2020)
 	* Fix for Chrome CORB errors
 	* Show rating from Goodreads as stars (thanks @[rubenmv](https://github.com/rubenmv/extension-goodreads-ratings-for-amazon/))

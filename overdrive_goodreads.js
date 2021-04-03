@@ -1,7 +1,11 @@
+setTimeout(function(){
+
 var goodreadsIconUrl = chrome.runtime.getURL('icons/goodreads-icon.png');
 var parser = new DOMParser();
 var parentDiv = document.querySelector('.js-starRatingsContainer');
 var overdriveStars = document.querySelector('.StarRatings');
+var titleContainerParent = document.querySelector('.title-column-top');
+var titleContainer = document.querySelector('.TitleDetailsHeading');
 
 // insert skeleton
 var initialHtmlString = "<div id='goodreadsRatingDiv'><span id='goodreadsRatingDivText' class='goodreadsRatingDivText'>";
@@ -10,8 +14,15 @@ initialHtmlString += "</span></div>";
 
 var initialHtml = parser.parseFromString(initialHtmlString, "text/html").querySelector("#goodreadsRatingDiv");
 
-// overdriveStars.nextSibling returns null because it is the last child of parentDiv; goodreadsRatingDiv is then always inserted after it
-parentDiv.insertBefore(initialHtml, overdriveStars.nextSibling);
+// handle situation when overdriveStars isn't pickup up (Edge)
+if (overdriveStars !== null) {
+	// overdriveStars.nextSibling returns null because it is the last child of parentDiv; goodreadsRatingDiv is then always inserted after it
+	parentDiv.insertBefore(initialHtml, overdriveStars.nextSibling);
+}
+else {
+	console.log('overdriveStars is null');
+	titleContainerParent.insertBefore(initialHtml, titleContainer.nextSibling);
+}
 
 var goodreadsRatingDiv = document.getElementById('goodreadsRatingDiv');
 var spinner = document.getElementById('goodreadsSpinner');
@@ -105,3 +116,5 @@ function getGoodreadsRating(isbn) {
 }
 
 getGoodreadsRating(OverdriveIsbn);
+
+}, 500);
