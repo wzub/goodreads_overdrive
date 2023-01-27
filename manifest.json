@@ -1,8 +1,8 @@
 {
 	"description": "View Goodreads ratings on Overdrive ebooks and audiobooks",
-	"manifest_version": 2,
+	"manifest_version": 3,
 	"name": "Goodreads Ratings on Overdrive",
-	"version": "1.2",
+	"version": "1.2.1",
 	"homepage_url": "https://waleedzuberi.com/code/goodreads-ratings-overdrive/",
 	"icons": {
 		"128": "icons/icon_128.png",
@@ -10,25 +10,22 @@
 	},
     "background":
     {
-        "scripts": ["background.js"]
+        "service_worker": "background.js"
     },
 	"content_scripts": [
 	{
-		"matches": ["*://*.overdrive.com/*","*://*.overdrive.com/*/media/*"],
+		"matches": ["https://*.overdrive.com/*"],
 		"js": ["overdrive_goodreads.js"],
 		"run_at": "document_end",
 		"css": ["overdrive_goodreads.css"]
 	}
 	],
-	"permissions": [
-		"*://*.goodreads.com/*",
-		"*://*.overdrive.com/*",
-		"*://*.overdrive.com/*/media/*"
-	],
-	"web_accessible_resources": [
-		"icons/goodreads-icon.png"
-	],
-	"page_action": {
+	"host_permissions": ["https://*.goodreads.com/*"],
+	"web_accessible_resources": [{
+		"resources": [ "icons/goodreads-icon.png" ],
+		"matches": [ "https://*.overdrive.com/*" ]
+	}],
+	"action": {
 		"default_icon": {
 			"96": "icons/icon_96.png"
 		},

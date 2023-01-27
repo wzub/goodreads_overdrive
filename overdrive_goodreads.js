@@ -5,6 +5,10 @@ var overdriveStars = document.querySelector('.StarRatings');
 var titleContainerParent = document.querySelector('.title-column-top');
 var titleContainer = document.querySelector('.TitleDetailsHeading');
 
+if (titleContainer === null || titleContainer === undefined) {
+	throw new ReferenceError("Not a book page");
+}
+
 // insert skeleton
 var initialHtmlString = "<div id='goodreadsRatingDiv'><span id='goodreadsRatingDivText' class='goodreadsRatingDivText'>";
 initialHtmlString += "<a id='goodreadsRatingUrl' href='#' target='_blank'><img src='"+goodreadsIconUrl+"' alt='rating on Goodreads.com' /><span id='goodreadsSpinner' class='spinner'></span><span id='goodreadsRatingResult'></span> </a>";
@@ -123,7 +127,7 @@ function getGoodreadsRating(isbn) {
 			}
 
 			var reviewCount = goodreadsPageMeta.querySelector('.RatingStatistics__meta').getAttribute('aria-label');
-			console.log(isbn + " has " + reviewCount);
+			// console.log(isbn + " has " + reviewCount);
 
 			var parentSpan = "<br/><span id='goodreadsRating' class='goodreadsRating'>";
 			parentSpan += "<span class='stars staticStars'>";
@@ -153,12 +157,12 @@ function getGoodreadsRating(isbn) {
 
 			goodreadsRatingUrl.href = goodreadsErrorUrl;
 			goodreadsRatingUrl.title = "search for " + decodeURI(overdriveTitle) + " on Goodreads.com";
-			goodreadsRatingResult.textContent = "Search on Goodreads.com";
 			spinner.style.display = 'none';
 
 			// check again
 			found = false;
 			if (counter < 10) getGoodreadsRating(OverdriveIsbn);
+			else goodreadsRatingResult.textContent = "Search on Goodreads.com";
 		}
 	});
 }
