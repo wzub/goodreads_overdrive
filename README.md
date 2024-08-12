@@ -17,6 +17,8 @@ The add-on only activates on Overdrive library pages and fetches ratings from Go
 ![screenshot](https://i0.wp.com/waleedzuberi.com/wp-content/uploads/2018/01/Screenshot-2018-1-17-A-Wrinkle-In-Time1.png?resize=1271%2C750&ssl=1)
 
 ## Changelog
+* Version 1.3 (12/8/2024)
+	* Compatibility for manifest v3
 * Version 1.2 (26/1/2022)
 	* Fix for new book page and stars on Goodreads (thanks @[rubenmv](https://github.com/rubenmv/extension-goodreads-ratings-for-amazon/))
 * Version 1.1.0 (3/4/2021)

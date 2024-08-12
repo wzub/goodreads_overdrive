@@ -5,25 +5,34 @@ var overdriveStars = document.querySelector('.StarRatings');
 var titleContainerParent = document.querySelector('.title-column-top');
 var titleContainer = document.querySelector('.TitleDetailsHeading');
 
-if (titleContainer === null || titleContainer === undefined) {
-	throw new ReferenceError("Not a book page");
+if (!titleContainer) {
+    // console.error("Not a book page");
+    throw new ReferenceError("Not a book page");
 }
 
 // insert skeleton
-var initialHtmlString = "<div id='goodreadsRatingDiv'><span id='goodreadsRatingDivText' class='goodreadsRatingDivText'>";
-initialHtmlString += "<a id='goodreadsRatingUrl' href='#' target='_blank'><img src='"+goodreadsIconUrl+"' alt='rating on Goodreads.com' /><span id='goodreadsSpinner' class='spinner'></span><span id='goodreadsRatingResult'></span> </a>";
-initialHtmlString += "</span></div>";
+var initialHtmlString = `
+    <div id='goodreadsRatingDiv'>
+        <span id='goodreadsRatingDivText' class='goodreadsRatingDivText'>
+            <a id='goodreadsRatingUrl' href='#' target='_blank'>
+                <img src='${goodreadsIconUrl}' alt='rating on Goodreads.com' />
+                <span id='goodreadsSpinner' class='spinner'></span>
+                <span id='goodreadsRatingResult'></span>
+            </a>
+        </span>
+    </div>
+`;
 
 var initialHtml = parser.parseFromString(initialHtmlString, "text/html").querySelector("#goodreadsRatingDiv");
 
 // handle situation when overdriveStars isn't picked up (Edge)
-if (overdriveStars !== null) {
-	// overdriveStars.nextSibling returns null because it is the last child of parentDiv; goodreadsRatingDiv is then always inserted after it
-	parentDiv.insertBefore(initialHtml, overdriveStars.nextSibling);
-}
-else {
-	console.log('overdriveStars is null');
-	titleContainerParent.insertBefore(initialHtml, titleContainer.nextSibling);
+if (overdriveStars && parentDiv) {
+    parentDiv.insertBefore(initialHtml, overdriveStars.nextSibling);
+} else if (titleContainerParent && titleContainer) {
+    console.log('overdriveStars is null');
+    titleContainerParent.insertBefore(initialHtml, titleContainer.nextSibling);
+} else {
+    console.error('Unable to insert Goodreads rating div');
 }
 
 var goodreadsRatingDiv = document.getElementById('goodreadsRatingDiv');
@@ -58,8 +67,13 @@ function removeTags(html) {
 }
 
 // get the ISBN from the page
-var OverdriveIsbn = encodeURI(document.querySelector('#title-format-details').textContent.match('[0-9]{11,13}'));
+var titleFormatDetails = document.querySelector('#title-format-details');
+var OverdriveIsbn = titleFormatDetails ? encodeURI(titleFormatDetails.textContent.match('[0-9]{11,13}')[0]) : null;
 console.log('Detected ISBN: ' + OverdriveIsbn);
+
+if (!OverdriveIsbn) {
+    console.error('Unable to find ISBN');
+}
 
 var found = false;
 var counter = 0;
@@ -102,69 +116,79 @@ function GetStarsContent(meta, stars, isNewStyle) {
 }
 
 function getGoodreadsRating(isbn) {
-	var url = "https://www.goodreads.com/book/isbn?isbn=" + isbn;
-	console.log("Getting ratings from " + url);
+    var url = "https://www.goodreads.com/book/isbn?isbn=" + isbn;
+    console.log("Getting ratings from " + url);
 
-	spinner.style.display = 'block';
+    if (spinner) spinner.style.display = 'block';
 
-	chrome.runtime.sendMessage({
-		contentScriptQuery: "getRating",
-		isbn: isbn
-	}, data => {
-		try {
-			counter++;
+    chrome.runtime.sendMessage({
+        contentScriptQuery: "getRating",
+        isbn: isbn
+    }, response => {
+        try {
+            counter++;
 
-			var goodreadsPage = parser.parseFromString(data, "text/html");
-			var goodreadsPageMeta = goodreadsPage.querySelector(".BookPageMetadataSection");
+            if (!response.success) {
+                throw new Error(response.error || "Failed to fetch data from Goodreads");
+            }
 
-			if (goodreadsPageMeta === undefined || goodreadsPageMeta === null) {
-				throw new ReferenceError("ISBN:" +isbn+ " not found on Goodreads.com");
-			}
+            var goodreadsPage = parser.parseFromString(response.data, "text/html");
+            var goodreadsPageMeta = goodreadsPage.querySelector(".BookPageMetadataSection");
 
-			var stars = goodreadsPageMeta.querySelector(".RatingStars");
-			if (stars === undefined || stars === null) {
-				throw new ReferenceError("Cannot find '.RatingStars' on Goodreads page");
-			}
+            if (!goodreadsPageMeta) {
+                throw new ReferenceError("ISBN:" + isbn + " not found on Goodreads.com");
+            }
 
-			var reviewCount = goodreadsPageMeta.querySelector('.RatingStatistics__meta').getAttribute('aria-label');
-			// console.log(isbn + " has " + reviewCount);
+            var stars = goodreadsPageMeta.querySelector(".RatingStars");
+            if (!stars) {
+                throw new ReferenceError("Cannot find '.RatingStars' on Goodreads page");
+            }
 
-			var parentSpan = "<br/><span id='goodreadsRating' class='goodreadsRating'>";
-			parentSpan += "<span class='stars staticStars'>";
-			let starsContent = GetStarsContent(goodreadsPageMeta, stars, true);
-			parentSpan += starsContent;
-			parentSpan += "</span>";
-			
-			var contentSpan = parser.parseFromString(parentSpan, "text/html").querySelector('.stars');
-			// goodreadsRatingUrl.append(contentSpan);
-			goodreadsRatingResult.textContent = '';
-			goodreadsRatingResult.append(contentSpan);
+            var reviewCount = goodreadsPageMeta.querySelector('.RatingStatistics__meta')?.getAttribute('aria-label');
 
-			goodreadsRatingUrl.href = url;
-			goodreadsRatingUrl.title = reviewCount;
-			spinner.style.display = 'none';
-			
-			found = true;
+            var parentSpan = `
+                <br/><span id='goodreadsRating' class='goodreadsRating'>
+                    <span class='stars staticStars'>
+                        ${GetStarsContent(goodreadsPageMeta, stars, true)}
+                    </span>
+                </span>
+            `;
+            
+            var contentSpan = parser.parseFromString(parentSpan, "text/html").querySelector('.stars');
+            if (goodreadsRatingResult) {
+                goodreadsRatingResult.textContent = '';
+                goodreadsRatingResult.append(contentSpan);
+            }
 
-		} catch (error) {
-			console.log(error);
+            if (goodreadsRatingUrl) {
+                goodreadsRatingUrl.href = url;
+                goodreadsRatingUrl.title = reviewCount || '';
+            }
+            if (spinner) spinner.style.display = 'none';
+            
+            found = true;
 
-			var overdriveTitle = encodeURIComponent(document.querySelector('h1.TitleDetailsHeading-title').textContent);
-			var overdriveAuthor = encodeURIComponent(document.querySelector('.TitleDetailsHeading-creatorLink').textContent);
-			// var overdriveSubtitle = encodeURIComponent(document.querySelector('.TitleSeries .subtitle').textContent);
-			// var overdriveSeries = encodeURIComponent(document.querySelector('.TitleSeries .series').textContent);
-			var goodreadsErrorUrl = 'https://www.goodreads.com/search?q='+overdriveTitle+' by '+overdriveAuthor;
+        } catch (error) {
+            console.error(error);
 
-			goodreadsRatingUrl.href = goodreadsErrorUrl;
-			goodreadsRatingUrl.title = "search for " + decodeURI(overdriveTitle) + " on Goodreads.com";
-			spinner.style.display = 'none';
+            var overdriveTitle = encodeURIComponent(document.querySelector('h1.TitleDetailsHeading-title')?.textContent || '');
+            var overdriveAuthor = encodeURIComponent(document.querySelector('.TitleDetailsHeading-creatorLink')?.textContent || '');
+            var goodreadsErrorUrl = 'https://www.goodreads.com/search?q=' + overdriveTitle + ' by ' + overdriveAuthor;
 
-			// check again
-			found = false;
-			if (counter < 10) getGoodreadsRating(OverdriveIsbn);
-			else goodreadsRatingResult.textContent = "Search on Goodreads.com";
-		}
-	});
+            if (goodreadsRatingUrl) {
+                goodreadsRatingUrl.href = goodreadsErrorUrl;
+                goodreadsRatingUrl.title = "search for " + decodeURI(overdriveTitle) + " on Goodreads.com";
+            }
+            if (spinner) spinner.style.display = 'none';
+
+            // check again
+            found = false;
+            if (counter < 10) getGoodreadsRating(OverdriveIsbn);
+            else if (goodreadsRatingResult) goodreadsRatingResult.textContent = "Search on Goodreads.com";
+        }
+    });
 }
 
-getGoodreadsRating(OverdriveIsbn);
+if (OverdriveIsbn) {
+    getGoodreadsRating(OverdriveIsbn);
+}
